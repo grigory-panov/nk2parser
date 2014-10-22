@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using Outlook = Microsoft.Office.Interop.Outlook;
-using Office = Microsoft.Office.Core;
 using Microsoft.Office.Interop.Outlook;
 
 using System.IO;
@@ -98,23 +96,33 @@ namespace OutlookAddInTest
 
             // в Outlook 2010-2013 лист с автодополнением хранится в inbox в скрытом письме с темой IPM.Configuration.Autocomplete
             // в 2003-2007 он лежит как файл формата .nk2
-            Microsoft.Office.Interop.Outlook.Application oApp = Globals.ThisAddIn.Application;
-            Microsoft.Office.Interop.Outlook.MAPIFolder inboxFolder = oApp.GetNamespace("MAPI").GetDefaultFolder(OlDefaultFolders.olFolderInbox);
-            //StorageItem storage = inboxFolder.GetStorage("IPM.Configuration.Autocomplete", OlStorageIdentifierType.olIdentifyByMessageClass);
-
-            //PropertyAccessor propertyAcc = storage.PropertyAccessor;
-            // получаем кеш как массив байт
-            //string prop_name = "PR_ROAMING_BINARYSTREAM";
-            //byte[] nk2 = propertyAcc.GetProperty(prop_name);// "http://schemas.microsoft.com/mapi/proptag/0x7C090102");
+            Application oApp = Globals.ThisAddIn.Application;
+            MAPIFolder inboxFolder = oApp.GetNamespace("MAPI").GetDefaultFolder(OlDefaultFolders.olFolderInbox);
+            StorageItem storage = null;
+            try
+            {
+                storage = inboxFolder.GetStorage("IPM.Configuration.Autocomplete", OlStorageIdentifierType.olIdentifyBySubject);
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return;
+            }
             
-            string filePath = "C:\\Users\\User\\Documents\\Professional 2013\\Outlook.NK2";
-            string filePathModified = "C:\\Users\\User\\Documents\\Professional 2013\\Outlook.NK2";
-            FileStream fileStream = File.OpenRead(filePath);
+            PropertyAccessor propertyAcc = storage.PropertyAccessor;
+            // получаем кеш как массив байт
+            string PR_ROAMING_BINARYSTREAM = "http://schemas.microsoft.com/mapi/proptag/0x7C090102";
+            byte[] content = propertyAcc.GetProperty(PR_ROAMING_BINARYSTREAM);// );
+            
+            //string filePath = "C:\\Users\\User\\Documents\\Professional 2013\\Outlook.NK2";
+            //string filePathModified = "C:\\Users\\User\\Documents\\Professional 2013\\Outlook.NK2";
+            //FileStream fileStream = File.OpenRead(filePath);
             int replacementPosition = 0;
             int replacementPosition2 = 0;
-            byte[] content = new byte[fileStream.Length];
+            
+            //byte[] content = new byte[fileStream.Length];
 
-            int numBytesToRead = (int)fileStream.Length;
+            /*int numBytesToRead = (int)fileStream.Length;
             int numBytesRead = 0;
             while (numBytesToRead > 0)
             {
@@ -123,7 +131,7 @@ namespace OutlookAddInTest
                     break;
                 numBytesRead += n;
                 numBytesToRead -= n;
-            }
+            }*/
             int idx = 0;
             uint propertyValueDataLength = 0;
             uint propertiesCount = 0;
@@ -318,13 +326,28 @@ namespace OutlookAddInTest
                                 }
                                 else
                                 {
-                                    if (replacementPosition != -1 && !string.IsNullOrEmpty(textToReplace))
+                                    if (replacementPosition > replacementPosition2)
                                     {
-                                        replace(replacementPosition - 4, textToReplace);
+                                        if (replacementPosition != -1 && !string.IsNullOrEmpty(textToReplace))
+                                        {
+                                            replace(replacementPosition - 4, textToReplace);
+                                        }
+                                        if (replacementPosition2 != -1 && !string.IsNullOrEmpty(textToReplace))
+                                        {
+                                            replace(replacementPosition2 - 4, textToReplace);
+                                        }
+
                                     }
-                                    if (replacementPosition2 != -1 && !string.IsNullOrEmpty(textToReplace))
+                                    else
                                     {
-                                        replace(replacementPosition2 - 4, textToReplace);
+                                        if (replacementPosition2 != -1 && !string.IsNullOrEmpty(textToReplace))
+                                        {
+                                            replace(replacementPosition2 - 4, textToReplace);
+                                        }
+                                        if (replacementPosition != -1 && !string.IsNullOrEmpty(textToReplace))
+                                        {
+                                            replace(replacementPosition - 4, textToReplace);
+                                        }
                                     }
                                     replacementPosition = -1;
                                     replacementPosition2 = -1;
@@ -389,9 +412,11 @@ namespace OutlookAddInTest
             printBinary(buffer, 12);
             buffer = null;
             Console.WriteLine("END");
-            fileStream.Close();
+            //fileStream.Close();
             byte[] a = (byte[])list.ToArray(typeof(byte));
-            File.WriteAllBytes(filePathModified, a);
+            propertyAcc.SetProperty(PR_ROAMING_BINARYSTREAM, a);
+            storage.Save();
+            //File.WriteAllBytes(filePathModified, a);
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
