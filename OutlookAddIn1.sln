@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookAddIn1", "OutlookAddIn1\OutlookAddIn1.csproj", "{22973388-8F77-4F29-A892-63438B97BC85}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup1", "Setup1\Setup1.vdproj", "{208F4A52-9399-48B5-94CA-08F5B1585F0C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{22973388-8F77-4F29-A892-63438B97BC85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22973388-8F77-4F29-A892-63438B97BC85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22973388-8F77-4F29-A892-63438B97BC85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{208F4A52-9399-48B5-94CA-08F5B1585F0C}.Debug|Any CPU.ActiveCfg = Debug
+		{208F4A52-9399-48B5-94CA-08F5B1585F0C}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
